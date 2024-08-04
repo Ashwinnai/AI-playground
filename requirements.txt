@@ -1,0 +1,10 @@
+streamlit==1.25.0
+typing-extensions==4.5.0
+groq==1.1.0
+pymupdf==1.23.2
+pandas==2.0.3
+python-docx==0.8.11
+moviepy==1.0.3
+pytesseract==0.3.10
+Pillow==10.0.0
+plotly==5.17.0
