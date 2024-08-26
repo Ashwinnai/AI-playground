@@ -117,11 +117,12 @@ models = {
     "llama3-groq-8b-8192-tool-use-preview": {"name": "LLaMA3-groq-8b-8192-tool-use-preview", "tokens": 8192, "developer": "Groq"},
 }
 
+# Default to llama-3.1-8b-instant
 model_option = st.sidebar.selectbox(
     "Choose a model:",
     options=list(models.keys()),
     format_func=lambda x: models[x]["name"],
-    index=4  # Default to mixtral
+    index=list(models.keys()).index("llama-3.1-8b-instant")  # Default to llama-3.1-8b-instant
 )
 
 # Detect model change and clear chat history if model has changed
@@ -137,8 +138,8 @@ max_tokens = st.sidebar.slider(
     "Max Tokens:",
     min_value=512,  # Minimum value to allow some flexibility
     max_value=max_tokens_range,
-    # Default value or max allowed if less
-    value=min(32768, max_tokens_range),
+    # Default value set to 7680
+    value=min(7680, max_tokens_range),
     step=512,
     help=f"Adjust the maximum number of tokens (words) for the model's response. Max for selected model: {max_tokens_range}"
 )
