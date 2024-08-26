@@ -36,7 +36,7 @@ st.sidebar.write("Welcome to the AI Playground! Here, you can experiment with di
 # Sidebar dropdown for API key input
 with st.sidebar.expander("Enter Password"):
     st.subheader("Enter Password")
-    api_key = st.text_input("Enter your API Key", type="password")
+    api_key = st.text_input("Enter your Password ", type="password")
 
 # Store API key in session state immediately if provided
 if api_key:
