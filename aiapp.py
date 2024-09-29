@@ -248,3 +248,9 @@ def handle_chat_input(prompt):
 prompt = st.chat_input("Enter your prompt here...")
 if prompt:
     handle_chat_input(prompt)
+# Footer
+st.markdown("""
+    <div style="position: fixed; bottom: 0; width: 100%; text-align: center; padding: 10px; background-color: #00000;">
+        <p>|Developed with ❤️ by Ashwin Nair | 
+    </div>
+    """, unsafe_allow_html=True)
