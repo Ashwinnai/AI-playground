@@ -9,6 +9,7 @@ import pytesseract
 from PIL import Image
 import plotly.express as px
 import time  # Importing time module to measure response time
+import streamlit_shadcn_ui as ui  # Streamlit Shadcn UI for buttons and other elements
 
 # Set Streamlit page configuration
 st.set_page_config(page_icon="💬", layout="wide", page_title="Ashwin's LLM")
@@ -26,10 +27,8 @@ def icon_with_text(emoji: str, text: str):
 # Use the icon_with_text function to display the icon and the AI Playground title
 icon_with_text("🏎️", "Ashwin's AI Playground")
 
-# Sidebar for options
+# Sidebar for options with Shadcn UI elements
 st.sidebar.title("Options")
-
-# Add Ashwin's AI Playground section in the sidebar
 st.sidebar.header("Ashwin's AI Playground")
 st.sidebar.write("Welcome to the AI Playground! Here, you can experiment with different AI models and functionalities.")
 
@@ -46,9 +45,12 @@ if api_key:
 if "api_key" not in st.session_state:
     st.session_state.api_key = None
 
-# Sidebar for file upload
+# Sidebar for file upload with enhanced UI
 st.sidebar.subheader("Upload Files")
-uploaded_file = st.sidebar.file_uploader("Upload a PDF, Word, Excel, or Video file", type=["pdf", "docx", "xlsx", "mp4", "avi", "mov"])
+uploaded_file = st.sidebar.file_uploader(
+    "Upload a PDF, Word, Excel, or Video file", 
+    type=["pdf", "docx", "xlsx", "mp4", "avi", "mov"]
+)
 
 # Sidebar for topics
 st.sidebar.subheader("Select a Topic")
@@ -103,18 +105,24 @@ if "selected_model" not in st.session_state:
     st.session_state.selected_model = None
 
 # Sidebar for model selection
-st.sidebar.subheader("Choose a Model")
 models = {
-    "gemma-7b-it": {"name": "Gemma-7b-it", "tokens": 8192, "developer": "Google"},
-    "llama2-70b-4096": {"name": "LLaMA2-70b-chat", "tokens": 4096, "developer": "Meta"},
-    "llama3-70b-8192": {"name": "LLaMA3-70b-8192", "tokens": 8192, "developer": "Meta"},
-    "llama3-8b-8192": {"name": "LLaMA3-8b-8192", "tokens": 8192, "developer": "Meta"},
-    "mixtral-8x7b-32768": {"name": "Mixtral-8x7b-Instruct-v0.1", "tokens": 32768, "developer": "Mistral"},
-    "llama3.1-7b-8192": {"name": "LLaMA3.1-7b-8192", "tokens": 8192, "developer": "Meta"},
-    "llama-3.1-70b-versatile": {"name": "LLaMA3.1-70b-versatile", "tokens": 8192, "developer": "Meta"},
-    "llama-3.1-8b-instant": {"name": "LLaMA3.1-8b-instant", "tokens": 8192, "developer": "Meta"},
-    "llama3-groq-70b-8192-tool-use-preview": {"name": "LLaMA3-groq-70b-8192-tool-use-preview", "tokens": 8192, "developer": "Groq"},
-    "llama3-groq-8b-8192-tool-use-preview": {"name": "LLaMA3-groq-8b-8192-tool-use-preview", "tokens": 8192, "developer": "Groq"},
+    "distil-whisper-large-v3-en": {"name": "Distil-Whisper English", "tokens": 25000, "developer": "HuggingFace", "type": "File (Audio)", "max_file_size": "25 MB"},
+    "gemma2-9b-it": {"name": "Gemma 2 9B", "tokens": 8192, "developer": "Google", "type": "Text"},
+    "gemma-7b-it": {"name": "Gemma 7B", "tokens": 8192, "developer": "Google", "type": "Text"},
+    "llama3-groq-70b-8192-tool-use-preview": {"name": "LLaMA3 Groq 70B Tool Use (Preview)", "tokens": 8192, "developer": "Groq", "type": "Text"},
+    "llama3-groq-8b-8192-tool-use-preview": {"name": "LLaMA3 Groq 8B Tool Use (Preview)", "tokens": 8192, "developer": "Groq", "type": "Text"},
+    "llama-3.1-70b-versatile": {"name": "LLaMA 3.1 70B", "tokens": 8192, "developer": "Meta", "type": "Text"},
+    "llama-3.1-8b-instant": {"name": "LLaMA 3.1 8B", "tokens": 8192, "developer": "Meta", "type": "Text"},
+    "llama-3.2-1b-preview": {"name": "LLaMA 3.2 1B (Preview)", "tokens": 8192, "developer": "Meta", "type": "Text"},
+    "llama-3.2-3b-preview": {"name": "LLaMA 3.2 3B (Preview)", "tokens": 8192, "developer": "Meta", "type": "Text"},
+    "llama-3.2-11b-vision-preview": {"name": "LLaMA 3.2 11B Vision (Preview)", "tokens": 8192, "developer": "Meta", "type": "Text and Vision"},
+    "llama-3.2-90b-vision-preview": {"name": "LLaMA 3.2 90B (Preview)", "tokens": 8192, "developer": "Meta", "type": "Text and Vision"},
+    "llama-guard-3-8b": {"name": "LLaMA Guard 3 8B", "tokens": 8192, "developer": "Meta", "type": "Text"},
+    "llava-v1.5-7b-4096-preview": {"name": "LLaVA 1.5 7B", "tokens": 4096, "developer": "Haotian Liu", "type": "Text"},
+    "llama3-70b-8192": {"name": "Meta LLaMA 3 70B", "tokens": 8192, "developer": "Meta", "type": "Text"},
+    "llama3-8b-8192": {"name": "Meta LLaMA 3 8B", "tokens": 8192, "developer": "Meta", "type": "Text"},
+    "mixtral-8x7b-32768": {"name": "Mixtral 8x7B", "tokens": 32768, "developer": "Mistral", "type": "Text"},
+    "whisper-large-v3": {"name": "Whisper", "tokens": 25000, "developer": "OpenAI", "type": "File (Audio)", "max_file_size": "25 MB"}
 }
 
 # Default to llama-3.1-8b-instant
@@ -159,21 +167,6 @@ if st.sidebar.button("Clear Chat"):
     st.session_state.messages = []
     st.rerun()
 
-# User Manual Dropdown
-with st.sidebar.expander("User Manual"):
-    st.subheader("User Manual")
-    st.markdown(
-        """
-        ### Welcome to Ashwin's AI Playground
-        - **Upload Files**: You can upload PDF, Word, Excel, or Video files to extract text.
-        - **Select a Topic**: Choose from topics like General, Data Analysis, Machine Learning, or Natural Language Processing.
-        - **Choose a Model**: Select from a range of AI models to use in your experiments.
-        - **Max Tokens**: Adjust the maximum number of tokens for the model's response.
-        - **Chat Input**: Enter your prompt in the chat box and interact with the selected AI model.
-        - **Response Time**: See the response time of the AI model in the sidebar metric.
-        """
-    )
-
 # Initialize Groq client if API key is provided
 if "client" not in st.session_state and st.session_state.api_key:
     st.session_state.client = Groq(api_key=st.session_state.api_key)
@@ -201,10 +194,10 @@ def handle_chat_input(prompt):
 
     # Fetch response from Groq API
     full_response = ""
-    
+
     # Start time
     start_time = time.time()  # Capture start time before generating the response
-    
+
     try:
         chat_completion = st.session_state.client.chat.completions.create(
             model=model_option,
@@ -223,23 +216,23 @@ def handle_chat_input(prompt):
         with st.chat_message("assistant", avatar="🤖"):
             chat_responses_generator = generate_chat_responses(chat_completion)
             full_response = "".join(chat_responses_generator)
-    
+
     except Exception as e:
         st.error(e, icon="🚨")
-    
+
     # Calculate the response time
     response_time = time.time() - start_time  # Calculate response time
-    
+
     # Append the full response to session_state.messages
     if full_response:
         # Add response time to the end of the assistant's message
         full_response += f"\n\n_Response generated in {response_time:.2f} seconds._"
-        
+
         st.session_state.messages.append(
             {"role": "assistant", "content": full_response})
 
     # Display the response time using a Streamlit metric in the sidebar
-    st.sidebar.metric(label="Response Time (seconds)", value=f"{response_time:.2f}")  # Display the response time as a float in the sidebar
+    st.sidebar.metric(label="Response Time (seconds)", value=f"{response_time:.2f}")
 
     # Trigger a rerun to update the UI dynamically
     st.rerun()
@@ -248,9 +241,10 @@ def handle_chat_input(prompt):
 prompt = st.chat_input("Enter your prompt here...")
 if prompt:
     handle_chat_input(prompt)
-# Footer
+
+# Footer with enhanced design
 st.markdown("""
     <div style="position: fixed; bottom: 0; width: 100%; text-align: center; padding: 10px; background-color: #00000;">
-        <p>|Developed with ❤️ by Ashwin Nair | 
+        <p>|Developed with ❤️ by Ashwin Nair |      
     </div>
     """, unsafe_allow_html=True)
