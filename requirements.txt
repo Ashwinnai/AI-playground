@@ -1,5 +1,4 @@
 streamlit
-typing-extensions
 groq
 pymupdf
 pandas
@@ -8,3 +7,4 @@ moviepy
 pytesseract
 Pillow
 plotly
+streamlit_shadcn_ui
