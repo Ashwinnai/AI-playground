@@ -255,6 +255,10 @@ def var_to_hex(var_name):
 # -----------------------------------------------------------------------------
 icon_with_text("🏎️", "Ashwin's AI Playground")
 
+# Initialize session state for api_key if not present
+if "api_key" not in st.session_state:
+    st.session_state.api_key = "" # Initialize as empty string
+
 # -----------------------------------------------------------------------------
 # SIDEBAR CONFIGURATION - REORGANIZED FOR BETTER UX
 # -----------------------------------------------------------------------------
@@ -264,14 +268,21 @@ with st.sidebar:
 
     # --- API Key Input ---
     with st.expander("🔑 API Credentials", expanded=True):
-        api_key = st.text_input("Enter your Groq API Key", type="password", key="api_key_input")
-        if api_key:
-            st.session_state.api_key = api_key
-            st.success("API Key accepted!", icon="✅")
+        # Always update session state with the current value of the text input
+        api_key_input = st.text_input(
+            "Enter your Groq API Key",
+            type="password",
+            key="api_key_input",
+            value=st.session_state.api_key # Set the initial value from session state
+        )
+        # Update session state with the actual value from the input field
+        st.session_state.api_key = api_key_input
 
-    # Initialize session state for api_key if not present
-    if "api_key" not in st.session_state:
-        st.session_state.api_key = None
+        if st.session_state.api_key:
+            st.success("API Key accepted!", icon="✅")
+        else:
+            st.warning("Please enter your Groq API Key to enable AI features.", icon="⚠️")
+
 
     # --- Model Selection ---
     # Sourced from https://console.groq.com/docs/models [1]
@@ -470,16 +481,27 @@ elif "last_uploaded" in st.session_state and st.session_state.last_uploaded:
 
 
 # -----------------------------------------------------------------------------
-# INITIALIZE GROQ CLIENT
+# INITIALIZE GROQ CLIENT - REVISED LOGIC
 # -----------------------------------------------------------------------------
-if "client" not in st.session_state and st.session_state.api_key:
+# Initialize client and last_groq_api_key in session state if they don't exist
+if "client" not in st.session_state:
+    st.session_state.client = None
+if "last_groq_api_key" not in st.session_state:
+    st.session_state.last_groq_api_key = None
+
+# If an API key is provided and it's different from the one used last time
+if st.session_state.api_key and st.session_state.api_key != st.session_state.last_groq_api_key:
     try:
         st.session_state.client = Groq(api_key=st.session_state.api_key)
+        st.session_state.last_groq_api_key = st.session_state.api_key # Store the key that successfully initialized the client
+        # st.toast("Groq client initialized successfully!") # Can be enabled for more feedback
     except Exception as e:
-        st.error(f"Failed to initialize Groq client: {e}. Please check your API key.")
+        st.error(f"Failed to initialize Groq client: {e}. Please check your API key and network connection.")
         st.session_state.client = None
-elif "client" not in st.session_state:
+        st.session_state.last_groq_api_key = None # Clear the stored key if initialization failed
+elif not st.session_state.api_key: # If API key is empty or cleared
     st.session_state.client = None
+    st.session_state.last_groq_api_key = None
 
 
 # -----------------------------------------------------------------------------
@@ -514,6 +536,12 @@ def generate_chat_responses(chat_completion) -> Generator[str, None, None]:
 
 def handle_chat_input(prompt):
     """Handles user input, calls the LLM, and updates chat history."""
+    
+    # Ensure client is initialized before making API call
+    if st.session_state.client is None:
+        st.error("Groq client not initialized. Please enter your API key in the sidebar.")
+        return
+
     st.session_state.chat_count += 1
     st.session_state.agent_usage[agent_key] = st.session_state.agent_usage.get(agent_key, 0) + 1
 
@@ -535,11 +563,6 @@ def handle_chat_input(prompt):
     try:
         start_time = time.time()
         
-        # Ensure client is initialized before making API call
-        if st.session_state.client is None:
-            st.error("Groq client not initialized. Please enter your API key.")
-            return
-
         chat_completion = st.session_state.client.chat.completions.create(
             model=model_option,
             messages=conversation_messages,
