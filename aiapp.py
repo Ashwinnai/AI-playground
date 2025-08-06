@@ -290,7 +290,7 @@ with st.sidebar:
         # Production Models
         "gemma2-9b-it": {"name": "Gemma 2 9B IT", "tokens": 8192, "developer": "Google", "type": "Text", "max_completion_tokens": 8192},
         "llama-3.1-8b-instant": {"name": "LLaMA 3.1 8B (Instant)", "tokens": 131072, "developer": "Meta", "type": "Text", "max_completion_tokens": 131072},
-        "llama-3.3-70b-versatile": {"name": "LLaMA 3.3 70B (Versatile)", "tokens": 131072, "developer": "Meta", "type": "Text", "max_completion_tokens": 32768},
+        "llama-3.3-70b-versatile": {"name": "LLaMA 3.3 70B (Versatile)", "tokens": 32768, "developer": "Meta", "type": "Text", "max_completion_tokens": 32768},
         "meta-llama/llama-guard-4-12b": {"name": "LLaMA Guard 4 12B", "tokens": 131072, "developer": "Meta", "type": "Text", "max_completion_tokens": 1024},
         "whisper-large-v3": {"name": "Whisper Large V3", "tokens": None, "developer": "OpenAI", "type": "File (Audio)", "max_completion_tokens": None},
         "whisper-large-v3-turbo": {"name": "Whisper Large V3 Turbo", "tokens": None, "developer": "OpenAI", "type": "File (Audio)", "max_completion_tokens": None},
@@ -301,9 +301,11 @@ with st.sidebar:
         "meta-llama/llama-prompt-guard-2-22m": {"name": "LLaMA Prompt Guard 2 22M (Preview)", "tokens": 512, "developer": "Meta", "type": "Text", "max_completion_tokens": 512},
         "meta-llama/llama-prompt-guard-2-86m": {"name": "LLaMA Prompt Guard 2 86M (Preview)", "tokens": 512, "developer": "Meta", "type": "Text", "max_completion_tokens": 512},
         "moonshotai/kimi-k2-instruct": {"name": "Kimi K2 Instruct (Preview)", "tokens": 131072, "developer": "Moonshot AI", "type": "Text", "max_completion_tokens": 16384},
+        "openai/gpt-oss-120b": {"name": "OpenAI GPT-OSS 120B (Preview)", "tokens": 131072, "developer": "OpenAI", "type": "Text", "max_completion_tokens": 32766},
+        "openai/gpt-oss-20b": {"name": "OpenAI GPT-OSS 20B (Preview)", "tokens": 131072, "developer": "OpenAI", "type": "Text", "max_completion_tokens": 32768},
         "playai-tts": {"name": "PlayAI TTS (Preview)", "tokens": 8192, "developer": "PlayAI", "type": "Text", "max_completion_tokens": 8192},
         "playai-tts-arabic": {"name": "PlayAI TTS Arabic (Preview)", "tokens": 8192, "developer": "PlayAI", "type": "Text", "max_completion_tokens": 8192},
-        "qwen/qwen3-32b": {"name": "Qwen 3 32B (Preview)", "tokens": 131072, "developer": "Alibaba Cloud", "type": "Text", "max_completion_tokens": 40960},
+        "qwen/qwen3-32b": {"name": "Qwen 3 32B (Preview)", "tokens": 131072, "developer": "Alibaba Cloud", "type": "Text", "max_completion_tokens": 131072},
         # Original models from the script
         "llama3-70b-8192": {"name": "Meta LLaMA 3 70B", "tokens": 8192, "developer": "Meta", "type": "Text", "max_completion_tokens": 8192},
         "llama3-8b-8192": {"name": "Meta LLaMA 3 8B", "tokens": 8192, "developer": "Meta", "type": "Text", "max_completion_tokens": 8192},
@@ -319,7 +321,7 @@ with st.sidebar:
             "Choose a model:",
             options=list(models.keys()),
             format_func=lambda x: models[x]["name"],
-            index=list(models.keys()).index(default_model_key)
+            index=list(models.keys()).index(default_model_key) if default_model_key in models else 0
         )
 
         # If model changes, clear messages and rerun
@@ -329,6 +331,9 @@ with st.sidebar:
             st.rerun() # Rerun to ensure chat history is cleared and prompt reflects new model
 
         max_tokens_range = models[model_option].get("max_completion_tokens", 8192)
+        if max_tokens_range is None: # Handle audio models with no token limit
+            max_tokens_range = 8192 
+        
         max_tokens = st.slider(
             "Max Tokens:", min_value=512, max_value=max_tokens_range,
             value=min(8192, max_tokens_range), step=512,
